@@ -13,11 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm run dev-install
-      - run: npm test
+      - uses: tree-sitter/setup-action/cli@v2
+      - run: tree-sitter generate
+      - run: tree-sitter test
       - run: ./copy-to-release
       - name: Deploy 🚀
         uses: peaceiris/actions-gh-pages@v3
