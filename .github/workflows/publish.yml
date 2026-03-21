@@ -15,17 +15,27 @@ jobs:
     with:
       generate: true
 
-  npm:
-    uses: tree-sitter/workflows/.github/workflows/package-npm.yml@main
-    secrets:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-    with:
-      generate: true
-
   # Inlined instead of reusable workflows because tree-sitter/workflows
-  # runs `tree-sitter generate` (needs Node). We generate from the checked-in
-  # grammar.json instead, which only needs the tree-sitter CLI.
+  # runs `npm install` before `tree-sitter generate`, which fails when
+  # parser.c is gitignored. We generate from grammar.json first, then
+  # install and build.
   # TODO: PR upstream to support a grammar-path input.
+
+  npm:
+    name: Publish npm package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - uses: tree-sitter/setup-action/cli@v2
+      - run: tree-sitter generate src/grammar.json
+      - run: npm install --ignore-scripts
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   crates:
     name: Publish Rust package
