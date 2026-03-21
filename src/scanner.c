@@ -218,7 +218,7 @@ static void lexerstate_add_heredoc(LexerState *state, TSPString *delim, bool int
 }
 
 static void lexerstate_finish_heredoc(LexerState *state) {
-  state->heredoc_delim.length = 0;
+  state->heredoc_delim = (TSPString){0};
   state->heredoc_state = HEREDOC_NONE;
 }
 
