@@ -583,6 +583,12 @@ bool tree_sitter_perl_external_scanner_scan(void *payload, TSLexer *lexer,
   if (valid_symbols[TOKEN_POD]) {
     int column = lexer->get_column(lexer);
     if (column == 0 && c == '=') {
+      ADVANCE_C;
+      /* POD requires '=' to be followed by a letter, e.g. =head1, =pod, =cut.
+       * Reject conflict markers like ======= which are not valid POD. */
+      if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) {
+        return false;
+      }
       DEBUG("POD started...\n", 0);
 
       /* Keep going until the linefeed after a line beginning `=cut` */
